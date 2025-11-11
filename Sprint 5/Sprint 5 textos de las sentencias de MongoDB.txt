@@ -1,0 +1,65 @@
+***** Nivel 1 *****
+
+1.
+Mostra els 2 primers comentaris que hi ha en la base de dades.
+
+db.comments.find().limit(2)
+
+
+Quants usuaris tenim registrats?
+
+db.users.find().count()
+
+
+Quants cinemes hi ha en l'estat de Califòrnia?
+
+db.theaters.find().count( { 'location.address.state': "CA" } )
+
+
+Quin va ser el primer usuari/ària en registrar-se?
+
+db.users.findOne( { }, { name: 1, _id: 0} )
+
+
+Quantes pel·lícules de comèdia hi ha en la nostra base de dades?
+
+db.movies.find( {genres : "Comedy"} ).count()
+
+
+
+2. Mostra'm tots els documents de les pel·lícules produïdes en 1932, però que el gènere sigui drama o estiguin en francès.
+
+db.movies.find( { $and: [
+                         { $or: [ {genres: 'Drama'}, {languages: 'French'} ] },
+                         { year: 1932 } ]
+                }, {year: 1, genres: 1, languages: 1, _id: 0} )
+
+
+3.  Mostra'm tots els documents de pel·lícules estatunidenques que tinguin entre 5 i 9 premis que van ser produïdes entre 2012 i 2014.
+
+db.movies.find( { countries: 'USA', 
+                  'awards.wins': { $gte: 5, $lte: 9}, 
+                  year: { $gte: 2012, $lte: 2014 }  }, { countries: 1, 'awards.wins': 1, year: 1})
+
+
+***** Nivel 2 *****
+
+1. Compte quants comentaris escriu un usuari/ària que utilitza "GAMEOFTHRON.ES" com a domini de correu electrònic.
+
+db.users.countDocuments( {email: {$regex: /@gameofthron.es/} })
+
+2. Quants cinemes hi ha en cada codi postal situats dins de l'estat Washington D. C. (DC)?
+
+db.theaters.aggregate( [
+   { $match: { "location.address.state": "DC" } }, 
+   { $group: { _id: "$location.address.zipcode", num_cinemas:{$sum: 1} } } ] )
+
+
+***** Nivel 3 *****
+
+1. Troba totes les pel·lícules dirigides per John Landis amb una puntuació IMDb (Internet Movie Database) d'entre 7,5 i 8.
+
+db.movies.find( { directors: {$regex: /John Landis/},
+                  "imdb.rating": { $gte: 7.5, $lte: 8 } }, { directors: 1, "imdb.rating": 1, _id: 0} )
+
+
